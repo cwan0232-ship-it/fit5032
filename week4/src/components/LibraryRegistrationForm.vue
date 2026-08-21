@@ -116,7 +116,11 @@
   <DataTable :value="submittedCards" tableStyle="min-width: 50rem">
     <Column field="username" header="Username"></Column>
     <Column field="password" header="Password"></Column>
-    <Column field="isAustralian" header="Australian Resident"></Column>
+    <Column header="Australian Resident">
+  <template #body="slotProps">
+    {{ slotProps.data.isAustralian ? 'Yes' : 'No' }}
+  </template>
+</Column>
     <Column field="gender" header="Gender"></Column>
     <Column field="reason" header="Reason"></Column>
   </DataTable>
