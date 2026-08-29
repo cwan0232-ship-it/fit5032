@@ -82,3 +82,44 @@ h1 {
   line-height: 0.98;
   letter-spacing: -0.055em;
 }
+
+.hero-summary {
+  max-width: 650px;
+  margin-bottom: 2rem;
+  color: #dce8e1;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.7;
+}
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+.button-primary { color: var(--forest-dark); background: var(--leaf); }
+.button-secondary { color: white; border-color: rgba(255, 255, 255, 0.55); }
+
+.hero-card {
+  padding: clamp(1.5rem, 4vw, 2.2rem);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+}
+.hero-card h2 { margin-bottom: 1.5rem; font-size: 1.8rem; }
+.hero-card dl, .hero-card dd { margin: 0; }
+.hero-card dl > div {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+.hero-card dt { color: #bcd0c5; }
+.hero-card dd { font-weight: 650; }
