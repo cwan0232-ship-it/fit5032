@@ -1,43 +1,48 @@
+<script setup>
+import { computed, ref } from 'vue'
+import HeroSection from './components/HeroSection.vue'
+import ProjectExplorer from './components/ProjectExplorer.vue'
+import SiteHeader from './components/SiteHeader.vue'
+import VolunteerForm from './components/VolunteerForm.vue'
+import { projects } from './data/projects.js'
+
+const selectedProjectId = ref(projects[0]?.id ?? '')
+
+const nextEvent = computed(() => {
+  const today = new Date()
+  const upcoming = projects
+    .filter((project) => new Date(`${project.date}T00:00:00`) >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+  return upcoming[0] ?? projects[0]
+})
+
+function selectProject(projectId) {
+  selectedProjectId.value = projectId
+}
+</script>
+
 <template>
   <div class="site-shell">
-    <header class="site-header">
-      <a class="brand" href="#top" aria-label="UrbanCanopy Melbourne home">
-        <span class="brand-mark" aria-hidden="true">UC</span>
-        <span><strong>UrbanCanopy</strong><small>Melbourne</small></span>
-      </a>
-
-      <nav aria-label="Primary navigation">
-        <a href="#projects">Projects</a>
-        <a href="#involved">Get involved</a>
-        <a href="#about">About us</a>
-      </nav>
-    </header>
-
+    <SiteHeader />
     <main id="top">
-      <section class="hero" aria-labelledby="hero-title">
+      <HeroSection :next-event="nextEvent" :project-count="projects.length" />
+      <ProjectExplorer :projects="projects" @select-project="selectProject" />
+      <VolunteerForm :projects="projects" :selected-project-id="selectedProjectId" />
+      <section id="about" class="content-section about-section" aria-labelledby="about-title">
         <div>
-          <p class="eyebrow">Local action. Living neighbourhoods.</p>
-          <h1 id="hero-title">Greener streets begin with community action.</h1>
-          <p class="hero-summary">
-            Discover practical tree-planting and biodiversity projects across Melbourne and help
-            create healthier, climate-resilient neighbourhoods.
-          </p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="#projects">Explore projects</a>
-            <a class="button button-secondary" href="#involved">Volunteer with us</a>
-          </div>
+          <p class="section-kicker">About UrbanCanopy</p>
+          <h2 id="about-title">Local knowledge, practical action and healthier neighbourhoods.</h2>
         </div>
-
-        <aside class="hero-card" aria-label="Next community event">
-          <p class="card-label">Next community event</p>
-          <h2>Creek Habitat Day</h2>
-          <dl>
-            <div><dt>Date</dt><dd>Saturday, 22 August</dd></div>
-            <div><dt>Location</dt><dd>Footscray</dd></div>
-            <div><dt>Places</dt><dd>6 of 20 available</dd></div>
-          </dl>
-        </aside>
+        <p>
+          UrbanCanopy Melbourne connects residents with community-led tree planting and
+          biodiversity projects. We make opportunities easier to find, understand and join,
+          especially in neighbourhoods that need more shade and habitat.
+        </p>
       </section>
     </main>
+    <footer class="site-footer">
+      <p>UrbanCanopy Melbourne</p>
+      <a href="#top">Back to top</a>
+    </footer>
   </div>
 </template>
