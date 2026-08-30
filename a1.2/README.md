@@ -25,14 +25,10 @@ npm run dev
 npm run build
 ```
 
-## Suggested demonstration
+## Demonstration walkthrough
 
 1. Resize the application across mobile, tablet and desktop widths.
 2. Search for a suburb and filter projects by type.
 3. Select a project and open the volunteer form.
 4. Submit invalid values to demonstrate multiple validation types.
 5. Correct the values and submit to show the saved confirmation.
-
-## AI acknowledgement
-
-Generative AI assisted with drafting the application scaffold and implementation. The student should review and understand all submitted code and keep this acknowledgement consistent with the unit's current requirements.
