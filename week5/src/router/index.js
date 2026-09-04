@@ -1,0 +1,56 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import AboutView from '../views/AboutView.vue'
+import LoginView from '../views/LoginView.vue'
+import AccessDeniedView from '../views/AccessDeniedView.vue'
+import { isAuthenticated } from '../stores/auth'
+
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomeView
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: AboutView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView
+  },
+  {
+    path: '/access-denied',
+    name: 'AccessDenied',
+    component: AccessDeniedView
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: { name: 'Home' }
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    return {
+      name: 'Login',
+      query: { denied: '1', redirect: to.fullPath }
+    }
+  }
+
+  if (to.name === 'Login' && isAuthenticated.value) {
+    return { name: 'About' }
+  }
+
+  return true
+})
+
+export default router
