@@ -6,6 +6,7 @@ import FirebaseSigninView from '../views/FirebaseSigninView.vue'
 import LogoutView from '../views/LogoutView.vue'
 import AddBookView from '../views/AddBookView.vue'
 import AccountView from '../views/AccountView.vue'
+import GetBookCountView from '../views/GetBookCountView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,6 +21,7 @@ const router = createRouter({
       component: AddBookView,
       meta: { requiresAuth: true, role: 'librarian' },
     },
+    { path: '/GetBookCount', name: 'GetBookCount', component: GetBookCountView },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

@@ -7,6 +7,7 @@ import { session } from '../stores/auth'
     <RouterLink to="/" class="brand">NoMash<span>Library</span></RouterLink>
     <nav aria-label="Main navigation">
       <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/GetBookCount">Get Book Count</RouterLink>
       <template v-if="session.user">
         <RouterLink to="/account">My account</RouterLink>
         <RouterLink v-if="session.role === 'librarian'" to="/addbook"

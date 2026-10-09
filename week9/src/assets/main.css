@@ -375,3 +375,26 @@ footer {
     padding: 22px;
   }
 }
+
+/* Week 9 & 10 */
+.function-panel {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.result {
+  font-size: 22px;
+  font-weight: 700;
+  color: #183c2e;
+}
+.endpoint {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+  word-break: break-all;
+}
+.capitalise-check {
+  margin: 24px 0;
+}
+.capitalise-check th {
+  text-align: left;
+}

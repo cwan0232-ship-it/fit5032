@@ -12,5 +12,5 @@ import { configured } from './Firebase/init'
     </p>
     <RouterView />
   </main>
-  <footer>NoMash Library <span>FIT5032 · Week 7 &amp; 8</span></footer>
+  <footer>NoMash Library <span>FIT5032 · Week 9</span></footer>
 </template>
