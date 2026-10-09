@@ -4,3 +4,4 @@ export const functionsBase =
   `https://us-central1-${import.meta.env.VITE_FIREBASE_PROJECT_ID}.cloudfunctions.net`
 
 export const countBooksUrl = `${functionsBase}/countBooks`
+export const getAllBooksUrl = `${functionsBase}/getAllBooks`

@@ -9,6 +9,8 @@ import { session } from '../stores/auth'
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/GetBookCount">Get Book Count</RouterLink>
       <RouterLink to="/WeatherCheck">Get Weather</RouterLink>
+      <RouterLink to="/CountBookAPI">Count Book API</RouterLink>
+      <RouterLink to="/GetAllBookAPI">Get All Book API</RouterLink>
       <template v-if="session.user">
         <RouterLink to="/account">My account</RouterLink>
         <RouterLink v-if="session.role === 'librarian'" to="/addbook"

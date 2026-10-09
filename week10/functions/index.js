@@ -1,4 +1,4 @@
-// FIT5032 Week 9 - Cloud Functions
+// FIT5032 Week 9 & 10 - Cloud Functions
 const { onRequest } = require('firebase-functions/v2/https')
 const { onDocumentCreated } = require('firebase-functions/v2/firestore')
 const logger = require('firebase-functions/logger')
@@ -7,7 +7,7 @@ const cors = require('cors')({ origin: true })
 
 admin.initializeApp()
 
-// Task 9.1 - count the documents in the "books" collection
+// Task 9.1 / 10.1 - count the documents in the "books" collection
 exports.countBooks = onRequest((req, res) => {
   cors(req, res, async () => {
     try {
@@ -48,3 +48,22 @@ exports.capitaliseBook = onDocumentCreated(
     await snapshot.ref.update(capitalised)
   },
 )
+
+// Task 10.2 - return every book as JSON
+exports.getAllBooks = onRequest((req, res) => {
+  cors(req, res, async () => {
+    try {
+      const snapshot = await admin
+        .firestore()
+        .collection('books')
+        .orderBy('isbn')
+        .get()
+      const books = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+
+      res.status(200).send({ count: books.length, books })
+    } catch (error) {
+      console.error('Error fetching books:', error.message)
+      res.status(500).send('Error fetching books')
+    }
+  })
+})
