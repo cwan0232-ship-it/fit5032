@@ -18,6 +18,8 @@ const users = ref([])
 const currentUser = ref(null)
 const ready = ref(false)
 let readyPromise = null
+// Set while register() runs so the auth listener does not create a profile before the name is saved
+let registering = false
 
 const authMessages = {
   'auth/email-already-in-use': { field: 'email', text: 'An account already uses this email address.' },
@@ -62,6 +64,7 @@ async function loadUsers() {
 export function initialiseAuth() {
   readyPromise ??= new Promise((resolve) => {
     onAuthStateChanged(auth, async (user) => {
+      if (registering) return
       try {
         currentUser.value = user ? await loadProfile(user) : null
         await loadUsers()
@@ -95,6 +98,7 @@ export async function register({ displayName, email, password, confirmPassword }
 
   if (Object.keys(fieldErrors).length) return { ok: false, fieldErrors }
 
+  registering = true
   try {
     const { user } = await createUserWithEmailAndPassword(auth, normalisedEmail, password)
     await updateProfile(user, { displayName: name })
@@ -110,6 +114,8 @@ export async function register({ displayName, email, password, confirmPassword }
     return { ok: true, user: currentUser.value }
   } catch (error) {
     return failure(error)
+  } finally {
+    registering = false
   }
 }
 

@@ -226,7 +226,7 @@ th[aria-sort] { color: var(--green-dark); }
 .trip-info dl div { padding: 0.75rem; border-radius: 6px; background: var(--mint); }
 .trip-info dt { color: var(--muted); font-size: 0.8rem; }
 .trip-info dd { margin: 0; color: var(--green-dark); font-size: 1.4rem; font-weight: 700; }
-.directions { max-height: 260px; overflow-y: auto; font-size: 0.9rem; line-height: 1.6; }
+.directions { max-height: 260px; overflow-y: auto; font-size: 0.9rem; line-height: 1.6; padding-left: 2rem; }
 .map-filter { max-width: 280px; margin-bottom: 0.75rem; }
 .map-canvas { height: min(70vh, 640px); min-height: 420px; border: 1px solid var(--line); border-radius: 6px; }
 .map-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; margin: 0.75rem 0 1.25rem; padding: 0; list-style: none; color: var(--muted); font-size: 0.85rem; }
