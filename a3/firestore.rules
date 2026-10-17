@@ -37,5 +37,23 @@ service cloud.firestore {
         && request.resource.data.displayName.size() > 1 && request.resource.data.displayName.size() <= 70;
       allow update, delete: if false;
     }
+    // A3 - bookings are created and cancelled only by Cloud Functions
+    match /bookings/{bookingId} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+    match /sessionStats/{sessionId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    // A3 - ratings are written only by the submitRating Cloud Function
+    match /ratings/{ratingId} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+    match /projectStats/{projectId} {
+      allow read: if true;
+      allow write: if false;
+    }
   }
 }
