@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
-import { db, functions } from '../firebase/init.js'
+import { auth, db, functions } from '../firebase/init.js'
 import sessions from '../data/sessions.json'
 
 const stats = ref({})
@@ -17,7 +17,7 @@ export function watchSessionStats() {
 }
 
 // Members see their own bookings; administrators see every booking
-export function watchBookings(user) {
+export function watchBookings(user, attempt = 0) {
   stopBookings?.()
   stopBookings = null
   bookings.value = []
@@ -28,6 +28,9 @@ export function watchBookings(user) {
     bookings.value = snapshot.docs
       .map((doc) => ({ id: doc.id, ...doc.data() }))
       .sort((a, b) => a.start.localeCompare(b.start))
+  }, () => {
+    // Right after sign-in Firestore can briefly lack the new token; try again once it arrives
+    if (attempt < 3) setTimeout(() => { if (auth.currentUser?.uid === user.id) watchBookings(user, attempt + 1) }, 1500)
   })
 }
 

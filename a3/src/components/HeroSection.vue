@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import sites from '../data/sites.json'
 
 const props = defineProps({
   nextEvent: { type: Object, required: true },
@@ -7,37 +8,37 @@ const props = defineProps({
 })
 
 const formattedDate = computed(() =>
-  new Intl.DateTimeFormat('en-AU', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(new Date(`${props.nextEvent.date}T00:00:00`)),
+  new Intl.DateTimeFormat('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })
+    .format(new Date(`${props.nextEvent.date}T00:00:00`)),
 )
-
 const placesAvailable = computed(() => props.nextEvent.capacity - props.nextEvent.registered)
+const treesPlanted = sites.reduce((sum, site) => sum + site.trees, 0).toLocaleString('en-AU')
+const suburbs = new Set(sites.map((site) => site.suburb)).size
 </script>
 
 <template>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <p class="eyebrow">Urban greening · Melbourne</p>
-      <h1 id="hero-title">Greener Melbourne, together.</h1>
+      <h1 id="hero-title">Help plant Melbourne's next generation of trees</h1>
       <p class="hero-summary">
-        Find one of {{ projectCount }} local projects and make a visible difference.
+        We run weekend planting days, creek clean-ups and seed-raising workshops with local councils and schools.
+        No experience needed. We bring the tools, gloves and morning tea.
       </p>
       <div class="hero-actions">
-        <a class="button button-primary" href="#projects">Find a project</a>
-        <a class="button button-secondary" href="#volunteer">Volunteer</a>
+        <a class="button button-primary" href="#/sessions">See upcoming sessions</a>
+        <a class="button button-secondary" href="#projects">Browse projects</a>
       </div>
+      <p class="hero-facts">
+        <strong>{{ treesPlanted }}</strong> trees planted across <strong>{{ suburbs }}</strong> suburbs
+        through <strong>{{ projectCount }}</strong> ongoing projects.
+      </p>
     </div>
-    <aside class="hero-card" aria-label="Next community event">
-      <p class="card-label">Next event</p>
-      <h2>{{ nextEvent.title }}</h2>
-      <dl>
-        <div><dt>Date</dt><dd>{{ formattedDate }}</dd></div>
-        <div><dt>Location</dt><dd>{{ nextEvent.suburb }}</dd></div>
-        <div><dt>Places</dt><dd>{{ placesAvailable }} of {{ nextEvent.capacity }} available</dd></div>
-      </dl>
+    <aside class="next-session" aria-labelledby="next-session-title">
+      <p class="next-session-label">Next session</p>
+      <h2 id="next-session-title">{{ nextEvent.title }}</h2>
+      <p>{{ formattedDate }}, {{ nextEvent.suburb }}</p>
+      <p>{{ placesAvailable }} of {{ nextEvent.capacity }} places left</p>
+      <a class="text-link" href="#/sessions">Book a place</a>
     </aside>
   </section>
 </template>

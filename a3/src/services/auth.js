@@ -1,7 +1,9 @@
 import { computed, readonly, ref } from 'vue'
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithPopup,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -26,11 +28,22 @@ const authMessages = {
 }
 
 async function loadProfile(user) {
-  const snapshot = await getDoc(doc(db, PROFILES, user.uid))
-  const profile = snapshot.exists() ? snapshot.data() : {}
+  const ref = doc(db, PROFILES, user.uid)
+  const snapshot = await getDoc(ref)
+  let profile = snapshot.exists() ? snapshot.data() : null
+  if (!profile) {
+    // First sign-in with an external provider (Google): create a member profile
+    profile = {
+      displayName: cleanPlainText(user.displayName || user.email.split('@')[0], 70),
+      email: user.email,
+      role: 'member',
+      createdAt: new Date().toISOString(),
+    }
+    await setDoc(ref, profile)
+  }
   return {
     id: user.uid,
-    displayName: profile.displayName || user.displayName || user.email,
+    displayName: profile.displayName || user.email,
     email: user.email,
     role: profile.role === 'admin' ? 'admin' : 'member',
     createdAt: profile.createdAt || user.metadata.creationTime,
@@ -114,6 +127,24 @@ export async function login({ email, password }) {
   } catch (error) {
     if (['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(error.code)) {
       return { ok: false, message: 'Email address or password is incorrect.' }
+    }
+    return failure(error)
+  }
+}
+
+// BR D.1 - external OAuth sign-in with a Google account
+export async function loginWithGoogle() {
+  try {
+    const { user } = await signInWithPopup(auth, new GoogleAuthProvider())
+    currentUser.value = await loadProfile(user)
+    await loadUsers()
+    return { ok: true, user: currentUser.value }
+  } catch (error) {
+    if (['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(error.code)) {
+      return { ok: false, message: 'Google sign-in was cancelled.' }
+    }
+    if (error.code === 'auth/popup-blocked') {
+      return { ok: false, message: 'Allow pop-ups for this site, then try again.' }
     }
     return failure(error)
   }

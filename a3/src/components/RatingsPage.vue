@@ -10,6 +10,7 @@ const emit = defineEmits(['request-login'])
 const { ratings, summaries } = useRatings()
 const selections = reactive({})
 const feedback = ref('')
+const feedbackOk = ref(true)
 
 const cards = computed(() => props.projects.map((project) => {
   const summary = summaries.value[project.id] ?? { average: 0, count: 0 }
@@ -19,19 +20,20 @@ const cards = computed(() => props.projects.map((project) => {
   return { ...project, ...summary, ownRating: ownRating?.score ?? null }
 }))
 
-function submitRating(projectId) {
+const saving = ref('')
+
+async function submitRating(projectId) {
   feedback.value = ''
   if (!props.currentUser) {
     emit('request-login')
     return
   }
-  const result = saveRating({
-    userId: props.currentUser.id,
-    projectId,
-    score: selections[projectId],
-  })
+  saving.value = projectId
+  const result = await saveRating({ projectId, score: selections[projectId] })
+  saving.value = ''
+  feedbackOk.value = result.ok
   feedback.value = result.ok
-    ? 'Your rating has been saved and the community average has been updated.'
+    ? `Thanks. The new average is ${result.average.toFixed(1)} from ${result.count} rating${result.count === 1 ? '' : 's'}.`
     : result.message
 }
 </script>
@@ -39,14 +41,13 @@ function submitRating(projectId) {
 <template>
   <main id="main-content" class="page-shell rating-page" tabindex="-1">
     <header class="page-heading">
-      <p class="section-kicker">Ratings</p>
-      <h1>Community favourites.</h1>
+      <h1>Project ratings</h1>
       <p>
         See the average, add your score, or change it later.
       </p>
     </header>
 
-    <p v-if="feedback" class="success-message page-feedback" role="status">{{ feedback }}</p>
+    <p v-if="feedback" :class="feedbackOk ? 'success-message' : 'form-alert'" class="page-feedback" role="status">{{ feedback }}</p>
     <div class="rating-grid">
       <article v-for="project in cards" :key="project.id" class="rating-card">
         <div class="rating-card-heading">
@@ -70,8 +71,8 @@ function submitRating(projectId) {
             </label>
           </div>
         </fieldset>
-        <button class="button button-outline" type="button" @click="submitRating(project.id)">
-          {{ currentUser ? 'Save rating' : 'Sign in to rate' }}
+        <button class="button button-outline" type="button" :disabled="saving === project.id" @click="submitRating(project.id)">
+          {{ saving === project.id ? 'Saving…' : currentUser ? 'Save rating' : 'Sign in to rate' }}
         </button>
       </article>
     </div>

@@ -1,63 +1,44 @@
-import { computed, ref } from 'vue'
-import { makeId, safeRead, safeWrite } from './security.js'
+import { ref } from 'vue'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { httpsCallable } from 'firebase/functions'
+import { auth, db, functions } from '../firebase/init.js'
 
-const RATINGS_KEY = 'urbancanopy-ratings-v2'
-const seedRatings = [
-  { id: 'seed-1', userId: 'community-1', projectId: 'street-tree-care', score: 5 },
-  { id: 'seed-2', userId: 'community-2', projectId: 'street-tree-care', score: 4 },
-  { id: 'seed-3', userId: 'community-3', projectId: 'pollinator-corridor', score: 5 },
-  { id: 'seed-4', userId: 'community-4', projectId: 'school-canopy', score: 4 },
-  { id: 'seed-5', userId: 'community-5', projectId: 'school-canopy', score: 5 },
-]
+// Project averages are public; each person can only see their own scores
+const summaries = ref({})
+const ratings = ref([])
+let stopSummaries = null
+let stopRatings = null
 
-const stored = safeRead(RATINGS_KEY, null)
-const ratings = ref(Array.isArray(stored) ? stored : seedRatings)
-if (!Array.isArray(stored)) safeWrite(RATINGS_KEY, ratings.value)
+export function watchRatings(user, attempt = 0) {
+  stopSummaries ??= onSnapshot(collection(db, 'projectStats'), (snapshot) => {
+    summaries.value = Object.fromEntries(snapshot.docs.map((doc) => [doc.id, doc.data()]))
+  })
+  stopRatings?.()
+  stopRatings = null
+  ratings.value = []
+  if (!user) return
+  stopRatings = onSnapshot(query(collection(db, 'ratings'), where('uid', '==', user.id)), (snapshot) => {
+    ratings.value = snapshot.docs.map((doc) => ({ id: doc.id, userId: doc.data().uid, ...doc.data() }))
+  }, () => {
+    // Right after sign-in Firestore can briefly lack the new token; try again once it arrives
+    if (attempt < 3) setTimeout(() => { if (auth.currentUser?.uid === user.id) watchRatings(user, attempt + 1) }, 1500)
+  })
+}
 
-export function saveRating({ userId, projectId, score }) {
+// BR E.1 - the submitRating Cloud Function validates the score and updates the average
+export async function saveRating({ projectId, score }) {
   const numericScore = Number(score)
-  if (!userId || !projectId || !Number.isInteger(numericScore) || numericScore < 1 || numericScore > 5) {
+  if (!projectId || !Number.isInteger(numericScore) || numericScore < 1 || numericScore > 5) {
     return { ok: false, message: 'Choose a rating from 1 to 5.' }
   }
-
-  const existing = ratings.value.find(
-    (rating) => rating.userId === userId && rating.projectId === projectId,
-  )
-
-  if (existing) {
-    existing.score = numericScore
-    existing.updatedAt = new Date().toISOString()
-  } else {
-    ratings.value.push({
-      id: makeId('rating'),
-      userId,
-      projectId,
-      score: numericScore,
-      updatedAt: new Date().toISOString(),
-    })
+  try {
+    const { data } = await httpsCallable(functions, 'submitRating')({ projectId, score: numericScore })
+    return { ok: true, ...data }
+  } catch (error) {
+    return { ok: false, message: error?.message?.replace(/^.*?: /, '').replace(/\s*\[\d{3}\]$/, '') || 'The rating could not be saved.' }
   }
-
-  if (!safeWrite(RATINGS_KEY, ratings.value)) {
-    return { ok: false, message: 'This browser could not save the rating.' }
-  }
-  return { ok: true }
 }
 
 export function useRatings() {
-  const summaries = computed(() => {
-    const grouped = new Map()
-    ratings.value.forEach((rating) => {
-      const group = grouped.get(rating.projectId) ?? []
-      group.push(rating.score)
-      grouped.set(rating.projectId, group)
-    })
-    return Object.fromEntries(
-      [...grouped].map(([projectId, scores]) => [projectId, {
-        count: scores.length,
-        average: scores.reduce((sum, score) => sum + score, 0) / scores.length,
-      }]),
-    )
-  })
-
   return { ratings, summaries }
 }

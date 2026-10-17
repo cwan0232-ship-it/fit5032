@@ -25,8 +25,7 @@ const filteredProjects = computed(() => {
   <section id="projects" class="content-section projects-section" aria-labelledby="projects-title">
     <div class="section-heading">
       <div>
-        <p class="section-kicker">Projects</p>
-        <h2 id="projects-title">Choose where to help.</h2>
+        <h2 id="projects-title">Current projects</h2>
       </div>
       <p>{{ filteredProjects.length }} project{{ filteredProjects.length === 1 ? '' : 's' }} shown</p>
     </div>

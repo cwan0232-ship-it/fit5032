@@ -1,6 +1,9 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import { cleanPlainText, isValidEmail, normaliseEmail } from '../services/security.js'
+import { cleanPlainText, isValidEmail, normaliseEmail, safeRead, safeWrite } from '../services/security.js'
+
+// Offline feature: the form is saved as a draft in this browser while you type
+const DRAFT_KEY = 'urbancanopy-volunteer-draft'
 
 const props = defineProps({
   projects: { type: Array, required: true },
@@ -14,6 +17,10 @@ const form = reactive({
   participants: 1,
   consent: false,
 })
+
+const draft = safeRead(DRAFT_KEY, null)
+if (draft) Object.assign(form, { name: draft.name ?? '', email: draft.email ?? '', participants: draft.participants ?? 1 })
+watch(() => ({ name: form.name, email: form.email, participants: form.participants }), (value) => safeWrite(DRAFT_KEY, value))
 
 const errors = reactive({ name: '', email: '', projectId: '', participants: '', consent: '' })
 const successMessage = ref('')
@@ -89,6 +96,7 @@ function submitForm() {
   registrations.push(registration)
   localStorage.setItem('urbancanopy-registrations', JSON.stringify(registrations))
 
+  localStorage.removeItem(DRAFT_KEY)
   successMessage.value = `Thanks, ${registration.name}. Your interest in ${selectedProject.value.title} has been saved.`
   form.name = ''
   form.email = ''
@@ -101,10 +109,9 @@ function submitForm() {
 <template>
   <section id="volunteer" class="volunteer-section" aria-labelledby="volunteer-title">
     <div class="volunteer-intro">
-      <p class="section-kicker">Volunteer</p>
-      <h2 id="volunteer-title">Save your place.</h2>
+      <h2 id="volunteer-title">Register your interest</h2>
       <p>
-        Pick a project and tell us who is coming.
+        Tell us which project you'd like to help with and we'll be in touch before the day. Your details are kept on this device until you send them.
       </p>
     </div>
 
