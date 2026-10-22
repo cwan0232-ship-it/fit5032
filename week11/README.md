@@ -12,7 +12,7 @@ npm install
 npm run dev
 ```
 
-The Firebase and OpenWeather settings go in `.env.local` (see `.env.example`). On Cloudflare they are set as environment variables in the project settings.
+The Firebase and OpenWeather settings go in `.env.local` (see `.env.example`). On Cloudflare they are set as build environment variables in the project settings, so the project has no `wrangler.jsonc` (a Wrangler file would override the dashboard settings).
 
 ## Deploy from the IDE
 
